@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>ShopItemFunc</title>
+	
+	<!-- Дополнительные файлы -->
+	<link rel="stylesheet" href="css/main.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+	<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+	<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+	
+	<!-- ShopItemClass -->
+	<script type="text/babel">
+		function ShopItemFunc(props) {
+		
+			const {item} = props
+			
+			return (
+				<div className="main-content">
+					<h2>{item.brand}</h2>
+					<h1>{item.title}</h1>
+					<h3>{item.description}</h3>
+					<div className="description">{item.descriptionFull}</div>
+					<div className="highlight-window mobile"><div className="highlight-overlay"></div></div>
+					<div className="divider"></div>
+					<div className="purchase-info">
+					<div className="price">{item.currency}{item.price}</div>
+						<button>Добавить в корзину</button>
+					</div>
+				</div>
+			);		
+		}
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+		const itemLeonard = {
+		  brand: 'Tiger of Sweden',
+		  title: 'Leonard coat',
+		  description: 'Minimalistic coat in cotton-blend',
+		  descriptionFull: 'Men\'s minimalistic overcoat in cotton-blend. Features a stand-up collar, concealed front closure and single back vent. Slim fit with clean, straight shape. Above-knee length.',
+		  price: 399,
+		  currency: '£'
+		}
+	
+  		ReactDOM.render(<div className="container">
+			<div className="background-element">
+			</div>
+			<div className="highlight-window">
+			  <div className='highlight-overlay'></div>
+			</div>
+			<div className="window">
+			  <ShopItemFunc item={itemLeonard} />
+			</div>
+		  </div>, document.getElementById("root"));
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+
