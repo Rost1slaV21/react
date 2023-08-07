@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Портфолио с фильтрами</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+	<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+	<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+	
+	<!-- ShopItemClass -->
+	<script type="text/babel">
+		const { useState } = React;
+
+		function Portfolio(props) {
+
+			const select = "All"
+			const [data, setData] = useState(select);
+
+			const ClickFilter = (e) => {
+				setData(e.currentTarget.getAttribute('item'));
+			}
+			
+			return (
+				<>
+					<div>
+						<Toolbar
+							filters={["All", "Websites", "Flayers", "Business Cards"]}
+							selected={data}
+							ClickFilter={ClickFilter}
+						/>
+					</div>
+					<ProjectList selected={data} ProjectItem={props.ProjectItem} />
+				</>
+			);		
+		}
+
+		//Фильтр
+		function Toolbar(props) {
+			
+			return (
+				props.filters.map((Item, index) =>
+					<button key={index} item={Item} className={`button-4 ${Item == props.selected ? 'active' : ''}`} onClick={props.ClickFilter}>{Item}</button>
+				)
+			);		
+		}
+
+		//Картинки
+		function ProjectList(props) {
+
+			return (
+				props.ProjectItem.map((Item, index) =>
+					<div key={index} className= {`imgItem ${props.selected != 'All' && props.selected != Item.category ? "hide" : ""}`}>
+						<img src={Item.img} />	
+					</div>
+				)
+			);		
+		}
+
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+		const ProjectItem = [
+			{
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/mon.jpg",
+			category: "Business Cards"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/200.jpg",
+			category: "Websites"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/emi_haze.jpg",
+			category: "Websites"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/codystretch.jpg",
+			category: "Websites"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/Triangle_003.jpg",
+			category: "Business Cards"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/place200x290.png",
+			category: "Websites"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/200.jpg",
+			category: "Websites"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/transmission.jpg",
+			category: "Business Cards"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/place200x290_1.png",
+			category: "Websites"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/place200x290_2.png",
+			category: "Flayers"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/the_ninetys_brand.jpg",
+			category: "Websites"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/dia.jpg",
+			category: "Business Cards"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/Triangle_350x197.jpg",
+			category: "Websites"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/emi_haze.jpg",
+			category: "Websites"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/transmission.jpg",
+			category: "Business Cards"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/Triangle_350x197_1.jpg",
+			category: "Websites"
+			}, {
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/place200x290_3.png",
+			category: "Flayers"
+			}
+		];
+
+  		ReactDOM.render(<Portfolio ProjectItem={ProjectItem} />, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+
