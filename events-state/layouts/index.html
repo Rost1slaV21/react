@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Портфолио с фильтрами</title>
+	<title>Расположение товаров</title>
 	
 	<!-- Стили -->
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 	<link rel="stylesheet" href="style.css">
 	
 	<!-- React -->
@@ -16,48 +17,101 @@
 	<script type="text/babel">
 		const { useState } = React;
 
-		function Portfolio(props) {
+		function Store(props) {
 
-			const select = "All"
-			const [data, setData] = useState(select);
+			let type
+			const initState = "view_list"
+			const [state, setData] = useState(initState);
 
-			const ClickFilter = (e) => {
-				setData(e.currentTarget.getAttribute('item'));
+			const handleSwitch = (e) => {
+				setData(() => {
+					switch(state) {
+						case 'view_list':
+							return 'view_module';
+						default:
+							return 'view_list';
+					}
+				})
+			}
+
+			if(state == "view_list"){
+				type = <CardsView icon={state} cards={props.products} />
+			}
+			else if(state == "view_module"){
+				type = <ListView icon={state} cards={props.products} />
 			}
 			
 			return (
 				<>
-					<div>
-						<Toolbar
-							filters={["All", "Websites", "Flayers", "Business Cards"]}
-							selected={data}
-							ClickFilter={ClickFilter}
-						/>
+					<div className="contanier-icon">
+						<IconSwitch icon={state} handleSwitch={handleSwitch}/>
 					</div>
-					<ProjectList selected={data} ProjectItem={props.ProjectItem} />
+					{type}
 				</>
 			);		
 		}
 
-		//Фильтр
-		function Toolbar(props) {
+		//Переключалка
+		function IconSwitch(props) {
 			
 			return (
-				props.filters.map((Item, index) =>
-					<button key={index} item={Item} className={`button-4 ${Item == props.selected ? 'active' : ''}`} onClick={props.ClickFilter}>{Item}</button>
+				<span className="material-icons" onClick={props.handleSwitch}>{props.icon}</span>
+			);		
+		}
+
+		/**
+		 * Карточки
+		*/
+		//Список
+		function CardsView(props) {
+
+			return (
+				props.cards.map((Item, index) =>
+					<ShopCard key={index} card={Item} />
 				)
 			);		
 		}
 
-		//Картинки
-		function ProjectList(props) {
+		//Товар
+		function ShopCard(props) {
 
 			return (
-				props.ProjectItem.map((Item, index) =>
-					<div key={index} className= {`imgItem ${props.selected != 'All' && props.selected != Item.category ? "hide" : ""}`}>
-						<img src={Item.img} />	
+				<div className="ShopCard">
+					<h1>{props.card.name}</h1>
+					<p>{props.card.color}</p>
+					<img src={props.card.img} />
+					<div className="flex">
+						<div>{props.card.price}</div>
+						<div><button>ADD TO CART</button></div>
 					</div>
+				</div>
+			);		
+		}
+
+		/**
+		 * Таблица
+		*/
+		//Список
+		function ListView(props) {
+
+			return (
+				props.cards.map((Item, index) =>
+					<ShopItem key={index} card={Item} />
 				)
+			);		
+		}
+
+		//Товар
+		function ShopItem(props) {
+
+			return (
+				<div className="ShopItem">
+					<div><img src={props.card.img} /></div>
+					<div><h1>{props.card.name}</h1></div>
+					<div><p>{props.card.color}</p></div>
+					<div>{props.card.price}</div>
+					<div><button>ADD TO CART</button></div>
+				</div>
 			);		
 		}
 
@@ -65,62 +119,41 @@
 </head>
 <body>
 	<script type="text/babel">
-		const ProjectItem = [
+		const products = [
 			{
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/mon.jpg",
-			category: "Business Cards"
+			name: "Nike Metcon 2",
+			price: "130",
+			color: "red",
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/layouts/img/1.jpg"
 			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/200.jpg",
-			category: "Websites"
+			name: "Nike Metcon 2",
+			price: "130",
+			color: "green",
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/layouts/img/2.jpg"
 			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/emi_haze.jpg",
-			category: "Websites"
+			name: "Nike Metcon 2",
+			price: "130",
+			color: "blue",
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/layouts/img/3.jpg"
 			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/codystretch.jpg",
-			category: "Websites"
+			name: "Nike Metcon 2",
+			price: "130",
+			color: "black",
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/layouts/img/4.jpg"
 			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/Triangle_003.jpg",
-			category: "Business Cards"
+			name: "Nike free run",
+			price: "170",
+			color: "black",
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/layouts/img/7.jpg"
 			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/place200x290.png",
-			category: "Websites"
-			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/200.jpg",
-			category: "Websites"
-			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/transmission.jpg",
-			category: "Business Cards"
-			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/place200x290_1.png",
-			category: "Websites"
-			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/place200x290_2.png",
-			category: "Flayers"
-			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/the_ninetys_brand.jpg",
-			category: "Websites"
-			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/dia.jpg",
-			category: "Business Cards"
-			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/Triangle_350x197.jpg",
-			category: "Websites"
-			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/emi_haze.jpg",
-			category: "Websites"
-			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/transmission.jpg",
-			category: "Business Cards"
-			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/Triangle_350x197_1.jpg",
-			category: "Websites"
-			}, {
-			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/filter/img/place200x290_3.png",
-			category: "Flayers"
+			name: "Nike Metcon 3",
+			price: "150",
+			color: "green",
+			img: "https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/events-state/layouts/img/5.jpg"
 			}
 		];
 
-  		ReactDOM.render(<Portfolio ProjectItem={ProjectItem} />, 
+  		ReactDOM.render(<Store products={products} />, 
 			document.getElementById("root")
 		);
   	</script>
