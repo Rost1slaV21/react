@@ -5,7 +5,7 @@
 	<title>Список предложений</title>
 	
 	<!-- Стили -->
-	<!-- link rel="stylesheet" href="css/main.css" -->
+	<link rel="stylesheet" href="css/main.css">
 	
 	<!-- React -->
 	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
@@ -15,25 +15,52 @@
 	
 	<script type="text/babel">
 		function Listing(props) {
-			
 			return (
-				props.items.map((Item) =>
-					<div key={Item.listing_id} className="item-list">
-						<div className="item">
-							<div className="item-image">
-								<a href={Item.url}>
-									<img src={Item.MainImage.url_570xN} />
-								</a>
+				props.items.map((Item) => {
+
+					if(Item.state == 'active'){
+						let price, quantity
+
+						if(Item.currency_code == 'USD'){
+							price = `$${Item.price}`;
+						}
+						else if(Item.currency_code == 'USD'){
+							price = `€${Item.price}`;
+						}
+						else {
+							price = `${Item.price} ${Item.currency_code}`;
+						}
+
+						if(Item.quantity <= 10){
+							quantity = 'level-low';
+						}
+						else if(Item.quantity <= 20){
+							quantity = 'level-medium';
+						}
+						else if(Item.quantity > 20){
+							quantity = 'level-high';
+						}
+
+						return <div key={Item.listing_id} className="item-list">
+								<div className="item">
+									<div className="item-image">
+										<a href={Item.url}>
+											<img src={Item.MainImage.url_570xN} />
+										</a>
+									</div>
+									<div className="item-details">
+										<p className="item-title">{Item.title}</p>
+										<p className="item-price">{price}</p>
+										<p className={`item-quantity ${quantity}`}>{Item.quantity}</p>
+									</div>
+								</div>
 							</div>
-							<div className="item-details">
-								<p className="item-title">{Item.title}</p>
-								<p className="item-price">{Item.currency_code} {Item.price}</p>
-								<p className="item-quantity level-medium">{Item.quantity}</p>
-							</div>
-						</div>
-					</div>
-				)
-			);		
+					}
+					else {
+						return null;
+					}
+				})
+			);
 		}
 	</script>
 </head>
