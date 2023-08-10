@@ -12,12 +12,27 @@
     <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone@7.9.4/babel.js"></script>
 	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script src="https://unpkg.com/prop-types@15.7.2/prop-types.js"></script>
 	
 	<script type="text/babel">
-		function Listing(props) {
-			return (
-				props.items.map((Item) => {
+		Listing.propTypes = {
+			items: PropTypes.arrayOf(PropTypes.shape({
+				listing_id: PropTypes.number.isRequired,
+				url: PropTypes.string,
+				MainImage: PropTypes.shape({
+					url_570xN: PropTypes.string
+				}),
+				title: PropTypes.string,
+				currency_code: PropTypes.string,
+				price: PropTypes.string,
+				quantity: PropTypes.number,			
+			})),
+		}
 
+		function Listing({items}) {
+
+			return (
+				items.map((Item) => {
 					if(Item.state == 'active'){
 						let price, quantity
 
