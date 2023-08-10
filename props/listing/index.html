@@ -39,16 +39,14 @@
 </head>
 <body>
 	<script type="text/babel">
+		const items = [];
 		axios.get('data/etsy.json').then(res => {
-			console.log(res.data);
+			items = res.data;
 		});
-		//const items = import('data/etsy.json'); 
 
-		//console.log(items);
-
-  		/*ReactDOM.render(<Listing items={items} />, 
+  		ReactDOM.render(<Listing items={items} />, 
 			document.getElementById("root")
-		);*/
+		);
   	</script>
 	
 	<div id="root"></div>
