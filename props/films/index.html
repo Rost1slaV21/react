@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Рейтинг фильмов</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.9.4/babel.js"></script>
+    <script src="https://unpkg.com/prop-types@15.7.2/prop-types.js"></script>
+	
+	<script type="text/babel">
+		Stars.propTypes = {
+			count: PropTypes.oneOf([...(new Array(5))].map((_, i) => i + 1))
+		}
+
+		function Stars({count}) {
+
+			let content = [];
+
+			for (let i = 1; i <= count; i++) {
+				content.push(<li key={i}><Star /></li>);
+			}
+			
+			return (
+				<ul className="card-body-stars u-clearfix">
+					{content}	
+				</ul>
+			);		
+		}
+
+		function Star() {
+			
+			return (
+				<svg fill="#D3BCA2" height="28" viewBox="0 0 18 18" width="28" xmlns="http://www.w3.org/2000/svg">
+					<path d="M9 11.3l3.71 2.7-1.42-4.36L15 7h-4.55L9 2.5 7.55 7H3l3.71 2.64L5.29 14z"/>
+					<path d="M0 0h18v18H0z" fill="none"/>
+				</svg>
+			);		
+		}
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+  		ReactDOM.render(<Stars count={3} />, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+
