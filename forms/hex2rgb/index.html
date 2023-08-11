@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Конвертер цветов из HEX в RGB</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.9.4/babel.js"></script>
+	
+	<script type="text/babel">
+		const { useState } = React;
+
+		function HEX2RGB() {
+
+			const[form, setForm] = useState({
+				hex: '',
+				rgbStr: '',
+				rgbColor: '',
+			});
+
+			function hexToRGB(hex) {
+				var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+				return result ? {
+					r: parseInt(result[1], 16),
+					g: parseInt(result[2], 16),
+					b: parseInt(result[3], 16)
+				} : null;
+			}
+
+			const handleChange = ({target}) => {
+				
+				let rgb, rgbColor, rgbStr
+
+				if(hexToRGB(target.value)){
+					rgb = hexToRGB(target.value)
+					rgbColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
+					rgbStr = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
+				}
+				else{
+					rgbColor = "red"
+					rgbStr = "Ошибка!"
+				}
+
+				setForm(prevForm => ({...prevForm, 
+					hex: target.value,
+					rgbColor: rgbColor,
+					rgbStr: rgbStr
+				}));
+			}
+			
+			return (
+				<form style={{backgroundColor: form.rgbColor}}>
+					<input type="text" name="hex" value={form.hex} onChange={handleChange} /><br />
+					<span>{form.rgbStr}</span>
+				</form>
+			);		
+		}
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+  		ReactDOM.render(<HEX2RGB />, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+

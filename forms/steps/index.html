@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Учёт тренировок</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.9.4/babel.js"></script>
+
+	
+	<script type="text/babel">
+		const { useState } = React;
+
+		function Workout() {
+
+			//Для формы
+			const[form, setForm] = useState({
+				date_input: '',
+				passed: '',
+			});
+			const inputsHandler = (e) =>{
+				const { name, value } = e.target;
+				setForm(prevForm => ({...prevForm, 
+					[name]: value
+				}));
+			}
+
+			//Элементы
+			const[listData, setData] = useState([]);
+
+			//Добавление элементов
+			const handleSubmit = (e) => {
+				e.preventDefault();
+
+				const newItem = {
+					date_input: form.date_input,
+					passed: form.passed,
+				};
+				setData([...listData, newItem]);
+			}
+
+			//Удаление элементов
+			const handleRemove = (ii) => {
+				setData(listData.filter((item, i) => i !== ii));
+			};
+			
+			return (
+				<>
+					<form onSubmit={handleSubmit}>
+						<label>
+							Дата:
+							<input type="text" name="date_input" onChange={inputsHandler} value={form.date_input.value} />
+						</label>
+				
+						<label>
+							Пройдено:
+							<input type="text" name="passed" onChange={inputsHandler} value={form.passed.value} />
+						</label>
+
+						<input type="submit" value="Отправить" />
+					</form>
+					<table>
+						<thead>
+							<tr><th>Дата</th><th>Пройдено</th><th>Удалить</th></tr>
+						</thead>
+						<tbody>
+							{listData.sort((a, b) => a.date_input > b.date_input ? 1 : -1).map((item, i) => 
+								<tr key={i}><td>{item.date_input}</td><td>{item.passed}</td><td><button onClick={() => handleRemove(i)}>Удалить</button></td></tr>
+							)}
+						</tbody>
+					</table>
+				</>
+			);		
+		}
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+  		ReactDOM.render(<Workout />, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+
