@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Декомпозиция</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.9.4/babel.js"></script>
+
+	
+	<script type="text/babel">
+		const { useState } = React;
+
+		function NewsBlock(props) {
+			const[listNews, setData] = useState(props.news[0].list);
+
+			const handleClickCat = (ii) => {
+				setData(props.news[ii].list)
+			}
+
+			return (
+				<>
+					<div>Тут новости. Список категорий и список самих новостей. При клике на категорию должен меняться список</div>
+					<ul>
+						{props.news.map((item, i) => 
+							<li key={i} onClick={() => handleClickCat(i)}>{item.cat}</li>
+						)}
+					</ul>
+					
+					<ul>
+						{listNews.map((item, i) => 
+							<li key={i}><img src={item.img} /><a href={item.link}>{item.name}</a></li>
+						)}
+					</ul>
+				</>
+			);
+		}
+
+		function WidgetDzen(props) {
+			return (
+				<>
+					<div>Тут виджет</div>
+					<Widget>
+						<img src={props.dzen.img} />
+						<h3>{props.dzen.title}</h3>
+						<p>{props.dzen.desc}</p>
+					</Widget>
+				</>
+			);
+		}
+
+		function Exchange(props) {
+			return (
+				<>
+					<div>Тут список валют</div>
+					<ul>
+						{props.exchange.map((item, i) => 
+							<li key={i}>{item.curency} {item.rate} {item.diff}</li>
+						)}
+					</ul>
+				</>
+			);
+		}
+
+		function OtherService(props) {
+			return (
+				<>
+					<div>Тут другие сервисы</div>
+					<ul>
+						{props.service.map((item, i) => 
+							<li key={i}><a href={item.link}>{item.name}</a></li>
+						)}
+					</ul>
+				</>
+			);
+		}
+
+		function Search(props) {
+			return (
+				<>
+					<div>Тут строка поиска, можно передать в подсказки, что последнее искали</div>
+					<form></form>					
+				</>
+			);
+		}
+
+		function Banners(props) {
+			return (
+				<>
+					<div>Тут баннеры</div>
+					<a href={props.banner.link}><img src={props.banner.img} /></a>					
+				</>
+			);
+		}
+
+		function Widgets(props) {
+			return (
+				<>
+					<div>Тут список виджетов в зависимости от типа</div>
+					{props.widgets.map((item, i) => {
+						let data
+
+						if(item.type == 'weather'){
+							return (
+								<Widget key={i}>
+									<h3>{item.data.title}</h3>
+									<p>{item.data.temperature}</p>
+								</Widget>
+							)
+						}
+						else if(item.type == 'tvProgram'){
+							return (
+								<Widget key={i}>
+									<h3>{item.data.title}</h3>
+									<ul>{item.data.list}</ul>
+								</Widget>
+							)
+						}
+					})}					
+				</>
+			);
+		}
+
+		function Widget(props) {
+			return (
+				<>
+					<div>Тут кастомный HTML</div>
+					{props.children}					
+				</>
+			);
+		}
+
+		function App(props) {
+			
+			return (
+				<>
+					<NewsBlock news={props.data.news}/>
+
+					<WidgetDzen dzen={props.data.dzen} />
+
+					<Exchange exchange={props.data.exchange}/>
+
+					<OtherService service={props.data.service}/>
+
+					<Search />
+
+					<Banners banner={props.data.banner}/>
+
+					<Widgets widgets={props.data.widgets}/>
+				</>
+			);		
+		}
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+		const data = {
+			news:[
+				{cat: 'Главное', list: [{img: '', link: '#', name: '111'}, {img: '', link: '#', name: '222'}]},
+				{cat: 'Другое', list: [{img: '', link: '#', name: '333'}]}
+			],
+			dzen:{
+				img: '', title: 'Как похудеть?', desc: 'В день три ложки...'
+			},
+			exchange:[
+				{curency: 'USD', rate: '1 млн', diff: '+100%'}, {curency: 'EUR', rate: '10 млн', diff: '+100%'}
+			],
+			service:[
+				{name: 'Новости', link: '#'}, {name: 'Картинки', link: '#'}
+			],
+			banner:{
+				link: '#', img: ''
+			},
+			widgets:[
+				{type: 'weather', data: {title: 'Погода', temperature: '+17'}},
+				{type: 'tvProgram', data: {title: 'Телепрограмма', list: 'Список'}}
+			]
+		}
+
+  		ReactDOM.render(
+			<App data={data}/>, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+
