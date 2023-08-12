@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>CRUD</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.9.4/babel.js"></script>
+
+	
+	<script type="text/babel">
+		const { useState, useEffect  } = React;
+
+		const dataFromServer = [
+			{
+				"id": 0,
+				"content": "First Note"
+			}
+		]
+
+		const fetchApi = () => {
+			return window.Promise.resolve(dataFromServer);
+		}
+
+		function CRUD() {
+
+			//Для формы
+			const[form, setForm] = useState({
+				text: '',
+			});
+			const inputsHandler = (e) =>{
+				const { name, value } = e.target;
+				setForm(prevForm => ({...prevForm, 
+					[name]: value
+				}));
+			}
+			
+			//Элементы
+			const[listData, setData] = useState([]);
+
+			//Добавление элементов
+			const handleSubmit = (e) => {
+				e.preventDefault();
+
+				let newItem = {
+					id: form.curId,
+					content: form.text,
+				};
+				setData([...listData, newItem]);
+			}
+
+			//Удаление элементов
+			const handleRemove = (id) => {
+				setData(listData.filter((item, i) => item.id !== id));
+			};
+
+			//Обновление элементов
+			const handleUpd = (e) => {
+				setData(listData);
+			}
+
+			//Получение данных с сервера
+			const loadData = () => {
+				fetchApi().then(data => {
+					setData(data);
+				})
+			}
+
+			//Получание данных после монтирования
+			useEffect(loadData, []);
+
+			console.log(listData);
+
+			return (
+				<>
+					<h3>Notes</h3><br/><button onClick={handleUpd}>Обновить</button>
+
+					<ListDataItems listData={listData} handleRemove={handleRemove}/>
+
+					<form onSubmit={handleSubmit}>
+						<input type="hidden" name="curId" value={listData.length} />
+						<label>
+							New Note:<br />
+							<textarea name="text" onChange={inputsHandler}>{form.text.value}</textarea>
+						</label><br />
+
+						<input type="submit" value="Отправить" />
+					</form>
+									
+				</>
+			);		
+		}
+
+		function ListDataItems(props) {				
+
+			return (
+				<ul>
+					{props.listData.map((item, i) => {
+						return (
+							<li key={i}>
+								{item.content}
+								<button onClick={() => props.handleRemove(item.id)}>Удалить</button>
+							</li>
+						)
+					})}
+				</ul>
+			)
+		}
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+
+  		ReactDOM.render(
+			<CRUD />, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+

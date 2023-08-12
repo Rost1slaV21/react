@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Мировые часы</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.9.4/babel.js"></script>
+
+	
+	<script type="text/babel">
+		const { useState, useEffect  } = React;
+
+		function Watche() {
+
+			//Для формы
+			const[form, setForm] = useState({
+				name: '',
+				time_zone: '',
+			});
+			const inputsHandler = (e) =>{
+				const { name, value } = e.target;
+				setForm(prevForm => ({...prevForm, 
+					[name]: value
+				}));
+			}
+			
+			//Элементы
+			const[listData, setData] = useState([]);
+
+			//Добавление элементов
+			const handleSubmit = (e) => {
+				e.preventDefault();
+
+				const newItem = {
+					name: form.name,
+					time_zone: form.time_zone,
+				};
+				setData([...listData, newItem]);
+			}
+
+			//Удаление элементов
+			const handleRemove = (ii) => {
+				setData(listData.filter((item, i) => i !== ii));
+			};
+
+			return (
+				<>
+					<form onSubmit={handleSubmit}>
+						<label>
+							Название:
+							<input type="text" name="name" onChange={inputsHandler} value={form.name.value} />
+						</label>
+				
+						<label>
+							Временная зона:
+							<input type="number" min="-12" max="12" step="1" name="time_zone" onChange={inputsHandler} value={form.time_zone.value} />
+						</label>
+
+						<input type="submit" value="Отправить" />
+					</form>
+					<ListDataItems listData={listData} handleRemove={handleRemove}/>				
+				</>
+			);		
+		}
+
+		function ListDataItems(props) {
+
+			const [time, setTime] = useState(Date.now());
+
+			let currentDate = new Date();
+
+			useEffect(() => {
+				
+				let interval
+				if(props.listData.length > 0){
+					interval = setInterval(() => setTime(Date.now()), 1000);
+				}
+
+				return () => {
+					clearInterval(interval);
+				};
+			});
+
+			return (
+				<ul>
+					{props.listData.map((item, i) => {
+						let calcDate = new Date(currentDate.getTime() + item.time_zone * 3600000);
+						let Hour = calcDate.getHours();
+						let Minutes = calcDate.getMinutes();
+						let Seconds = calcDate.getSeconds();
+
+						return (
+							<li key={i}>
+								{item.name} - Текущее время: {Hour}:{Minutes}:{Seconds}
+								<button onClick={() => props.handleRemove(i)}>Удалить</button>
+							</li>
+						)
+					})}
+				</ul>
+			)
+		}
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+
+  		ReactDOM.render(
+			<Watche />, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+
