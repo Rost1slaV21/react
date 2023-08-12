@@ -37,29 +37,54 @@
 			const handleSubmit = (e) => {
 				e.preventDefault();
 
-				const newItem = {
-					date_input: form.date_input,
-					passed: form.passed,
-				};
-				setData([...listData, newItem]);
+				if (!(listData.filter(e => e.date_input === form.date_input).length > 0)) {
+					const newItem = {
+						date_input: form.date_input,
+						passed: form.passed,
+					};
+					setData([...listData, newItem]);
+				}
+				else{
+
+					//Копируем
+					const copeListData = listData.slice()
+
+					//Меняем элемент
+					listData.map((item, i) => {
+						if(item.date_input === form.date_input){
+							copeListData[i].passed = Number(copeListData[i].passed) + Number(form.passed)
+						}
+					})
+
+					//Сохраняем новое состояние
+					setData(copeListData);
+				}
+				
+				//Очистка формы
+				/*setForm({
+					date_input: '',
+					passed: '',
+				})*/
 			}
 
 			//Удаление элементов
 			const handleRemove = (ii) => {
 				setData(listData.filter((item, i) => i !== ii));
 			};
-			
+
+			//console.log(form)
+
 			return (
 				<>
 					<form onSubmit={handleSubmit}>
 						<label>
 							Дата:
-							<input type="text" name="date_input" onChange={inputsHandler} value={form.date_input.value} />
+							<input type="date" name="date_input" onChange={inputsHandler} value={form.date_input.value} />
 						</label>
 				
 						<label>
 							Пройдено:
-							<input type="text" name="passed" onChange={inputsHandler} value={form.passed.value} />
+							<input type="number" min="1" step="1" name="passed" onChange={inputsHandler} value={form.passed.value} />
 						</label>
 
 						<input type="submit" value="Отправить" />
@@ -69,7 +94,7 @@
 							<tr><th>Дата</th><th>Пройдено</th><th>Удалить</th></tr>
 						</thead>
 						<tbody>
-							{listData.sort((a, b) => a.date_input > b.date_input ? 1 : -1).map((item, i) => 
+							{listData.sort((a, b) => a.date_input > b.date_input ? -1 : 1).map((item, i) => 
 								<tr key={i}><td>{item.date_input}</td><td>{item.passed}</td><td><button onClick={() => handleRemove(i)}>Удалить</button></td></tr>
 							)}
 						</tbody>
