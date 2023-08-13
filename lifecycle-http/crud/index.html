@@ -16,17 +16,7 @@
 	<script type="text/babel">
 		const { useState, useEffect  } = React;
 
-		const dataFromServer = [
-			{
-				"id": 0,
-				"content": "First Note"
-			}
-		]
-
-		const fetchApi = () => {
-			return window.Promise.resolve(dataFromServer);
-		}
-
+	
 		function CRUD() {
 
 			//Для формы
@@ -47,34 +37,57 @@
 			const handleSubmit = (e) => {
 				e.preventDefault();
 
-				let newItem = {
-					id: form.curId,
-					content: form.text,
-				};
-				setData([...listData, newItem]);
+				fetch('backend/ajax.php?type=set', {
+					method: 'POST',
+					body: JSON.stringify(form),
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8',
+					},
+				})
+				.then((response) => response.json())
+				.then((data) => {
+					loadData()
+				})
+				.catch((err) => {
+					console.log(err.message);
+				});
 			}
 
 			//Удаление элементов
 			const handleRemove = (id) => {
-				setData(listData.filter((item, i) => item.id !== id));
+				fetch('backend/ajax.php?type=del', {
+					method: 'POST',
+					body: JSON.stringify({id: id}),
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8',
+					},
+				})
+				.then((response) => response.json())
+				.then((data) => {
+					loadData()
+				})
+				.catch((err) => {
+					console.log(err.message);
+				});
 			};
 
 			//Обновление элементов
 			const handleUpd = (e) => {
-				setData(listData);
+				loadData()
 			}
 
 			//Получение данных с сервера
 			const loadData = () => {
-				fetchApi().then(data => {
-					setData(data);
+				
+				fetch('backend/ajax.php?type=get')
+				.then((response) => response.json())
+				.then((findresponse)=> {
+					setData(findresponse);
 				})
 			}
 
 			//Получание данных после монтирования
 			useEffect(loadData, []);
-
-			console.log(listData);
 
 			return (
 				<>
@@ -83,7 +96,6 @@
 					<ListDataItems listData={listData} handleRemove={handleRemove}/>
 
 					<form onSubmit={handleSubmit}>
-						<input type="hidden" name="curId" value={listData.length} />
 						<label>
 							New Note:<br />
 							<textarea name="text" onChange={inputsHandler}>{form.text.value}</textarea>
