@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Форматирование даты публикации</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="css/index.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.9.4/babel.js"></script>
+
+	
+	<script type="text/babel">
+		const { useState, useEffect  } = React;
+
+		const withData = (Component, date) => {
+
+			return class extends React.Component {
+				constructor(props) {
+					super(props);
+					this.state = {};
+				}
+
+				componentDidMount() {
+					let defaultDate = new Date(this.props.date), curDate = new Date(), diffInTime  = curDate.getTime() - defaultDate.getTime(), diff
+
+					let day = 1000 * 60 * 60 * 24, hour = 1000 * 60 * 60, minute = 1000 * 60
+
+					if(Math.round(diffInTime / day) > 0){
+						diff = Math.round(diffInTime / day)
+
+						this.setState({
+							strDate: `${diff} дней назад`
+						})
+					}
+					else if(Math.round(diffInTime / hour) > 0){
+						diff = Math.round(diffInTime / hour)
+
+						this.setState({
+							strDate: `${diff} часов назад`
+						})
+					}
+					else if(Math.round(diffInTime / minute) > 0){
+						diff = Math.round(diffInTime / minute)
+
+						this.setState({
+							strDate: `${diff} минут назад`
+						})
+					}
+				}
+
+				render() {
+					return <Component {...this.props} {...this.state}/>;
+				}
+			};
+		};
+
+		const DateTimePretty = withData(
+			DateTime,
+			(date) => ({date})
+		);
+	
+		function DateTime(props) {
+
+			return (
+				<p className="date">{props.strDate ? props.strDate : props.date}</p>
+			)
+		}
+
+		function Video(props) {
+			return (
+				<div className="video">
+					<iframe src={props.url} frameBorder="0" allow="autoplay; encrypted-media" allowFullScreen></iframe>
+					<DateTimePretty date={props.date} />
+				</div>
+			)
+		}
+
+		function VideoList(props) {
+			return props.list.map(item => <Video url={item.url} date={item.date} />);
+		}
+
+		function App() {
+			const [list, setList] = useState([
+				{
+					url: 'https://www.youtube.com/embed/rN6nlNC9WQA?rel=0&amp;controls=0&amp;showinfo=0',
+					date: '2017-07-31 13:24:00'
+				},
+				{
+					url: 'https://www.youtube.com/embed/dVkK36KOcqs?rel=0&amp;controls=0&amp;showinfo=0',
+					date: '2018-03-03 12:10:00'
+				},
+				{
+					url: 'https://www.youtube.com/embed/xGRjCa49C6U?rel=0&amp;controls=0&amp;showinfo=0',
+					date: '2018-02-03 23:16:00'
+				},
+				{
+					url: 'https://www.youtube.com/embed/RK1K2bCg4J8?rel=0&amp;controls=0&amp;showinfo=0',
+					date: '2018-01-03 12:10:00'
+				},
+				{
+					url: 'https://www.youtube.com/embed/TKmGU77INaM?rel=0&amp;controls=0&amp;showinfo=0',
+					date: '2018-01-01 16:17:00'
+				},
+				{
+					url: 'https://www.youtube.com/embed/TxbE79-1OSI?rel=0&amp;controls=0&amp;showinfo=0',
+					date: '2017-12-02 05:24:00'
+				},
+			]);
+
+			return (
+				<VideoList list={list} />
+			);
+		}
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+
+  		ReactDOM.render(
+			<App />, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+
