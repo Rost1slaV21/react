@@ -68,9 +68,7 @@
 			//Достаем контекст
 			const {userId, setUser} = useContext(AuthContext);
 
-			if(!userId){
-				return null;
-			}
+			if(!userId) return
 
 			//Получаем данные с сервера
 			const loadData = () => {

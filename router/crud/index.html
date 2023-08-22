@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>CRUD</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/react-router-dom/4.2.2/react-router-dom.min.js"></script>
+
+	<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+	
+	<script type="text/babel">
+		function HomePage() {
+
+			//Элементы
+			const[listData, setData] = useState([]);
+
+			//Получение данных с сервера
+			const loadData = () => {
+				
+				fetch('backend/ajax.php?type=get')
+				.then((response) => response.json())
+				.then((data) => {
+					setData(data);
+				})
+				.catch((err) => {
+					console.log(err.message);
+				});
+			}
+			useEffect(loadData, []);
+
+			return (
+				<div>
+					<Link to="/new">Создать</Link>
+
+					<h3>Посты:</h3>
+					<ul>
+						{listData.map((item, i) => {
+							return (
+								<li key={item.id}>
+									<Link to={`/post/${item.id}`}>{item.content}</Link>
+								</li>
+							)
+						})}
+					</ul>
+				</div>
+			)
+		}
+
+		function New({ match, history }) {
+
+			//Для формы
+			const[form, setForm] = useState({
+				text: '',
+			});
+			const inputsHandler = (e) =>{
+				const { name, value } = e.target;
+				setForm(prevForm => ({...prevForm, 
+					[name]: value
+				}));
+			}
+			
+			//Сохранение формы
+			const handleSubmit = (e) => {
+				e.preventDefault();
+
+				fetch('backend/ajax.php?type=set', {
+					method: 'POST',
+					body: JSON.stringify(form),
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8',
+					},
+				})
+				.then((response) => response.json())
+				.then((data) => {
+					history.push('/')
+				})
+				.catch((err) => {
+					console.log(err.message);
+				});
+			}
+
+			return (
+				<div>
+					<button	type='button' onClick={() => { history.push('/') }}>Закрыть</button>
+					<form onSubmit={handleSubmit}>
+						<label>
+							New Note:<br />
+							<textarea name="text" onChange={inputsHandler}>{form.text.value}</textarea>
+						</label><br />
+
+						<input type="submit" value="Отправить" />
+					</form>
+				</div>
+			)
+		}
+
+		function Post({ match, history }) {
+
+			//Элементы
+			const[item, setData] = useState([]);
+
+			//Получение данных с сервера
+			const loadData = () => {
+				
+				fetch('backend/ajax.php?type=get', {
+					method: 'POST',
+					body: JSON.stringify({id: match.params.id}),
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8',
+					},
+				})
+				.then((response) => response.json())
+				.then((data) => {
+					setData(data);
+				})
+				.catch((err) => {
+					console.log(err.message);
+				});
+			}
+			useEffect(loadData, []);
+
+			//Удаление элементов
+			const handleRemove = (id) => {
+				fetch('backend/ajax.php?type=del', {
+					method: 'POST',
+					body: JSON.stringify({id: id}),
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8',
+					},
+				})
+				.then((response) => response.json())
+				.then((data) => {
+					history.push('/')
+				})
+				.catch((err) => {
+					console.log(err.message);
+				});
+			};
+
+			return (
+				<div>
+					{item.content}
+					<Link to={`/edit/${item.id}`}>Редактировать</Link>
+					<button onClick={() => handleRemove(item.id)}>Удалить</button>
+				</div>
+			)
+		}
+
+		function PostEdit({ match, history }) {
+
+			const navUrl = `/post/${match.params.id}`
+
+			//Для формы
+			const[form, setForm] = useState({
+				id: '111',
+				text: '',
+			});
+			const inputsHandler = (e) =>{
+				setForm({
+					...form,
+					text: e.target.value
+				});
+			}
+			
+			//Сохранение формы
+			const handleSubmit = (e) => {
+				e.preventDefault();
+
+				fetch('backend/ajax.php?type=upd', {
+					method: 'POST',
+					body: JSON.stringify(form),
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8',
+					},
+				})
+				.then((response) => response.json())
+				.then((data) => {
+					history.push(navUrl)
+				})
+				.catch((err) => {
+					console.log(err.message);
+				});
+			}
+
+			//Получение данных с сервера
+			const loadData = () => {
+				
+				fetch('backend/ajax.php?type=get', {
+					method: 'POST',
+					body: JSON.stringify({id: match.params.id}),
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8',
+					},
+				})
+				.then((response) => response.json())
+				.then((data) => {
+					setForm({
+						id: data.id,
+						text: data.content
+					});
+				})
+				.catch((err) => {
+					console.log(err.message);
+				});
+			}
+			useEffect(loadData, []);
+
+			return (
+				<div>
+					<button	type='button' onClick={() => { history.push('/') }}>Закрыть</button>
+					<form onSubmit={handleSubmit}>
+						<input type="hidden" value={form.id} />
+
+						<label>
+							Edit Note:<br />
+							<textarea name="text" onChange={inputsHandler}>{form.text}</textarea>
+						</label><br />
+
+						<input type="submit" value="Отправить" />
+					</form>
+				</div>
+			)
+		}
+
+		function App() {
+			return (
+				<Router>
+					<div>
+						<Route exact path="/" component={HomePage} />
+						<Route path="/new" component={New} />
+						<Route path="/post/:id" component={Post} />
+						<Route path="/edit/:id" component={PostEdit} />
+					</div>
+				</Router>
+			);
+		}
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+		//Хуки
+		const { useState, useEffect  } = React;
+		
+		//ReactRouter
+		const ReactRouter = window.ReactRouterDOM;
+		const Router = ReactRouter.HashRouter;
+		const Route = ReactRouter.Route;
+		const NavLink = ReactRouter.NavLink;
+		const Link = ReactRouter.Link;
+
+		ReactDOM.render(
+			<App />, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+
