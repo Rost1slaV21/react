@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>useJsonFetch</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.9.4/babel.js"></script>
+
+	
+	<script type="text/babel">
+		const { useState, useEffect } = React;
+
+		function useJsonFetch(url, opts) {
+			const [data, setData] =	useState(opts);
+			const [loading, setLoading] = useState(false);
+			const [error, setError] = useState(null);
+
+			const loadData = () => {
+
+				setLoading(true);
+				try {
+					const response = fetch(url);
+					if (!response.ok) {
+						throw new
+						Error(response.statusText); 
+					}
+
+					const items = response.json();
+					setData(items); 
+					setError(null);
+
+				} 
+				catch (e) {
+					setError(e);
+				} 
+				finally { 
+					setLoading(false); 
+				}
+			}
+			useEffect(loadData, []);
+
+			return [data, loading, error];
+		}
+
+		function CompA() {
+			//Получаем данные с сервера
+			const [data, loading, error] = useJsonFetch('http://localhost:7070/data', []);
+			
+			return (
+				{data}
+			);
+		}
+
+		function CompB() {
+			//Получаем данные с сервера
+			const [data, loading, error] = useJsonFetch('http://localhost:7070/error', []);
+			
+			return (
+				{loading}
+			);
+		}
+
+		function CompC() {
+			//Получаем данные с сервера
+			const [data, loading, error] = useJsonFetch('http://localhost:7070/loading', []);
+			
+			return (
+				{error}
+			);
+		}
+
+
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+
+  		ReactDOM.render(
+			<>
+				<CompA />
+				<CompB />
+				<CompC />
+			</>, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Список и детали</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.9.4/babel.js"></script>
+
+	
+	<script type="text/babel">
+		const { useState, useEffect, createContext, useContext } = React;
+
+		const AuthContext = createContext({url: null});
+
+		function List() {
+
+			const [listItems, setData] = useState([]);
+			const [isLoading, setLoading] = useState(false);
+
+			//Достаем контекст
+			const {userId, setUser} = useContext(AuthContext);
+
+			//Получаем данные с сервера
+			const loadData = () => {
+				
+				fetch('https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/hooks-context/use-effect/data/users.json')
+					.then((response) => response.json())
+					.then((findresponse)=> {
+						setData(findresponse);
+						setLoading(true);
+					})
+			}
+			useEffect(loadData, []);
+
+			//Обработчик клика, меняем контекст
+			const handleClick = (id) => {
+				setUser(id);
+			}
+			
+			console.log('Is List');
+			
+			return (
+				<>
+					{!isLoading && <p>Loading...</p>}
+
+					<ul>
+						{listItems.map((item, i) => {
+							return (
+								<li key={item.id} onClick={() => handleClick(item.id)}>{item.name}</li>
+							)
+						})}
+					</ul>
+				</>
+			);
+		}
+
+		function Details() {
+
+			const [item, setData] = useState([]);
+			const [isLoading, setLoading] = useState(false);
+
+			//Достаем контекст
+			const {userId, setUser} = useContext(AuthContext);
+
+			if(!userId){
+				return null;
+			}
+
+			//Получаем данные с сервера
+			const loadData = () => {
+
+				let url = `https://raw.githubusercontent.com/netology-code/ra16-homeworks/master/hooks-context/use-effect/data/${userId}.json`
+				
+				fetch(url)
+					.then((response) => response.json())
+					.then((findresponse)=> {
+						setData(findresponse);
+						setLoading(true);
+					})
+			}
+			useEffect(loadData, [userId]);
+
+			console.log('Is Details');
+
+			return (
+				<>
+					<div>
+						{!isLoading && <p>Loading...</p>}
+
+						<img src={item.avatar} />
+						<p>{item.name}</p>
+						{/*<p>{item.details.city}</p>
+						<p>{item.details.company}</p>
+						<p>{item.details.position}</p>*/}
+					</div>
+				</>
+			);	
+		}
+
+		function App() {
+
+			const [userId, setUser] = useState();
+
+			return (
+				<AuthContext.Provider value={{userId, setUser}}>
+					<List />
+					<Details />
+				</AuthContext.Provider>
+			);
+		}
+
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+
+  		ReactDOM.render(
+			<App />, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+
