@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Фильтрация</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+
+	<!-- Redux -->
+	<script src="https://unpkg.com/react-redux@8.0.5/dist/react-redux.min.js"></script>
+    <script src="https://unpkg.com/@reduxjs/toolkit@1.9.3/dist/redux-toolkit.umd.js"></script>
+
+	<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+	
+	<script type="text/babel">
+		//Хуки
+		const { useState, useEffect  } = React;
+
+		//Редакс
+		const { useDispatch, useSelector, Provider } = ReactRedux;
+		const { combineReducers, createStore } = RTK;
+
+		//Редюсеры - типа правила изменения глобального состояния
+		//Элементы
+		const initialStateItems = [
+			{id: 0, name: 'Замена стекла', price: 21000},
+			{id: 1, name: 'Замена дисплея', price: 25000},
+		];
+		const itemsReducer = (state = initialStateItems, action) => {
+			switch (action.type) {
+				case 'FILTER_ITEMS':
+					const {name, value} = action.payload;
+
+					if(value.length > 0){
+						const re = RegExp(`.*${value.toLowerCase().split('').join('.*')}.*`)
+
+						return state.filter(service => service.name.toLowerCase().match(re));
+					}
+					else {
+						return initialStateItems;
+					}
+					
+				default:
+					return state;
+			}
+		};
+
+		//Для формы
+		const initialStateForm = { name: '', price: ''};
+		const formReducer = (state = initialStateForm, action) => {
+			switch (action.type) {
+				case 'CHANGE_SERVICE_FIELD':
+					const {name, value} = action.payload;
+					return {...state, [name]: value};
+				default:
+					return state;
+			}
+		};
+
+		//Комбинируем редюсеры
+		const reducer = combineReducers({
+			items: itemsReducer,
+			form: formReducer,
+		});
+
+		//Создаем хранилище
+		const store = createStore(reducer);
+
+		//Компоненты
+		function Form () {
+
+			//Подписываемся на глобальное состояние
+			const form = useSelector((state) => state.form);
+			const items = useSelector((state) => state.items);
+
+        	const dispatch = useDispatch();
+
+			const handleChange = evt => {
+				const {name, value} = evt.target;
+				dispatch({type: 'CHANGE_SERVICE_FIELD', payload: {name, value}});
+				dispatch({type: 'FILTER_ITEMS', payload: {name, value}});
+			}
+
+			return (
+				<form>
+					<div>
+						<input type="text" name="name" onChange={handleChange} value={form.name} />
+					</div>
+				</form>
+			)
+		}
+
+		function List() {
+			//Подписываемся на глобальное состояние
+			const items = useSelector((state) => state.items);
+        	const dispatch = useDispatch();
+
+			return (
+				<ul>
+					{items.map(o => (
+						<li key={o.id}>
+							{o.name} {o.price}
+						</li>
+					))}
+				</ul>
+			)
+		}
+
+		function App() {
+			return (
+				<Provider store={store}>
+					<Form />
+					<List />
+				</Provider>
+			);
+		}
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+		ReactDOM.render(
+			<App />, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+

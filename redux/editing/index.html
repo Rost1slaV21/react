@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Редактирование</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+
+	<!-- Redux -->
+	<script src="https://unpkg.com/react-redux@8.0.5/dist/react-redux.min.js"></script>
+    <script src="https://unpkg.com/@reduxjs/toolkit@1.9.3/dist/redux-toolkit.umd.js"></script>
+
+	<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+	
+	<script type="text/babel">
+		//Хуки
+		const { useState, useEffect  } = React;
+
+		//Редакс
+		const { useDispatch, useSelector, Provider } = ReactRedux;
+		const { combineReducers, createStore } = RTK;
+
+		//Редюсеры - типа правила изменения глобального состояния
+		//Элементы
+		const initialStateItems = [
+			{id: 0, name: 'Замена стекла', price: 21000},
+			{id: 1, name: 'Замена дисплея', price: 25000},
+		];
+		const itemsReducer = (state = initialStateItems, action) => {
+			switch (action.type) {
+				case 'ADD_SERVICE':
+					let newId = state.length + 1
+					const {name, price} = action.payload;
+					return [...state, {id: newId, name, price: Number(price)}];
+				case 'REMOVE_SERVICE':
+						return state.filter(service => service.id !== action.payload);
+				case 'EDIT_SERVICE':
+					const newItems = state.map(
+						   (item, i) => item.id === action.payload.id ? {...item, name: action.payload.name, price: Number(action.payload.price)}: item
+					   )
+					return newItems;
+				default:
+					return state;
+			}
+		};
+
+		//Для формы
+		const initialStateForm = { id: '', name: '', price: '', is_edit: false};
+		const formReducer = (state = initialStateForm, action) => {
+			switch (action.type) {
+				case 'CHANGE_SERVICE_FIELD':
+					const {name, value} = action.payload;
+					return {...state, [name]: value};
+				case 'EDIT_ITEMS':
+					return {...state, id: action.payload.id, name: action.payload.name, price: action.payload.price, is_edit: true};
+				case 'CLEAR':
+					return initialStateForm;
+				default:
+					return state;
+			}
+		};
+
+		//Комбинируем редюсеры
+		const reducer = combineReducers({
+			items: itemsReducer,
+			form: formReducer,
+		});
+
+		//Создаем хранилище
+		const store = createStore(reducer);
+
+		//Компоненты
+		function Form () {
+			//Подписываемся на глобальное состояние
+			const form = useSelector((state) => state.form);
+        	const dispatch = useDispatch();
+
+			const handleChange = evt => {
+				const {name, value} = evt.target;
+
+				dispatch({type: 'CHANGE_SERVICE_FIELD', payload: {name, value}});
+			}
+
+			const handleSubmit = evt => {
+				evt.preventDefault();
+
+				if(!form.is_edit){
+					const {name, price} = form;
+
+					dispatch({type: 'ADD_SERVICE', payload: {name, price}});
+				}
+				else{
+					const {id, name, price} = form;
+
+					dispatch({type: 'EDIT_SERVICE', payload: {id, name, price}});
+				}
+			}
+			
+			const handleClear = evt => {
+				dispatch({type: 'CLEAR'});
+			}
+			
+			const Clear = () => (
+				<div>
+					<input type="button" onClick={handleClear} value="Очистить" />
+				</div>
+			)
+
+			return (
+				<form onSubmit={handleSubmit}>
+					<div>
+						<input type="text" name="name" onChange={handleChange} value={form.name} />
+					</div>
+					<div>
+						<input type="number" name="price" onChange={handleChange} value={form.price} />
+					</div>
+					<div>
+						<input type="submit" value="Отправить" />
+					</div>
+					{ form.is_edit ? <Clear /> : null }
+				</form>
+			)
+		}
+
+		function List() {
+			//Подписываемся на глобальное состояние
+			const items = useSelector((state) => state.items);
+        	const dispatch = useDispatch();
+
+			const handleRemove = id => { 
+				dispatch({type: 'REMOVE_SERVICE', payload: id})
+			};
+
+			const handleEdit = id => {
+				let item = items.filter(service => service.id == id)[0];
+
+				dispatch({type: 'EDIT_ITEMS', payload: item})
+			};
+			
+			console.log(items)
+
+			return (
+				<ul>
+					{items.map(o => (
+						<li key={o.id}>
+							{o.name} {o.price}
+							<button onClick={() => handleEdit(o.id)}>Редактировать</button>
+							<button onClick={() => handleRemove(o.id)}>✕</button>
+						</li>
+					))}
+				</ul>
+			)
+		}
+
+		function App() {
+			return (
+				<Provider store={store}>
+					<Form />
+					<List />
+				</Provider>
+			);
+		}
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+		ReactDOM.render(
+			<App />, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+

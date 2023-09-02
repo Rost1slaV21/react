@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Redux Toolkit</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+
+	<!-- Redux -->
+	<script src="https://unpkg.com/react-redux@8.0.5/dist/react-redux.min.js"></script>
+    <script src="https://unpkg.com/@reduxjs/toolkit@1.9.3/dist/redux-toolkit.umd.js"></script>
+
+	<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+	
+	<script type="text/babel">
+		//Хуки
+		const { useState, useEffect  } = React;
+
+		//Редакс
+		const { useDispatch, useSelector, Provider } = ReactRedux;
+		const { createSlice, configureStore, createAsyncThunk } = RTK;
+
+		//Slice items
+		const fetchItems = createAsyncThunk(
+			'items/fetchItems',
+			async (name) => {
+				let url = `https://www.omdbapi.com/?apikey=64405bd2&s=${name}`
+				
+				return fetch(url)
+						.then((res) => res.json())
+						.then((res) => res)
+			}
+		);
+
+		const initialStateItems = {
+			load: false,
+			error: '',
+			items: []
+		};
+		const itemsSlice = createSlice({
+			name: "items",
+			initialState: initialStateItems,
+			reducers: {
+				
+			},
+			extraReducers: (builder) => {
+				builder
+				.addCase(fetchItems.pending, (state) => {
+					state.load = true;
+					state.error = '';
+					state.items = [];
+				})
+				.addCase(fetchItems.fulfilled, (state, action) => {
+					if(action.payload.Response == 'False'){
+						state.load = false;
+						state.error = action.payload.Error;
+						state.items = [];
+					}
+					else {
+						state.load = false;
+						state.error = '';
+						state.items = action.payload.Search;
+					}
+				})
+				.addCase(fetchItems.rejected, (state, action) => {
+					console.log(333)
+					state.load = false;
+					state.error = action.error.message;
+					state.items = [];
+				});
+			}
+		});
+
+		//Slice form
+		const initialStateForm = { name: ''};
+		const formSlice = createSlice({
+			name: "items",
+			initialState: initialStateForm,
+			reducers: {
+				change: (state, action) => {
+					const {name, value} = action.payload;
+					return {...state, [name]: value};
+				},
+			}
+		});
+
+		//Хранилище
+		const store = configureStore({
+			reducer: {
+				items: itemsSlice.reducer,
+				form: formSlice.reducer,
+			},
+		});
+
+		//Компоненты
+		function Form () {
+			//Подписываемся на глобальное состояние
+			const form = useSelector((state) => state.form);
+        	const dispatch = useDispatch();
+
+			const handleChange = evt => {
+				const {name, value} = evt.target;
+
+				dispatch(formSlice.actions.change({name, value}));
+			}
+
+			const handleSubmit = evt => {
+				evt.preventDefault();
+
+				const {name} = form;
+
+				dispatch(fetchItems(name));
+			}
+
+			return (
+				<form onSubmit={handleSubmit}>
+					<div>
+						<input type="text" name="name" onChange={handleChange} value={form.name} />
+					</div>
+					<div>
+						<input type="submit" value="Отправить" />
+					</div>
+				</form>
+			)
+		}
+
+		function List() {
+			//Подписываемся на глобальное состояние
+			const items = useSelector((state) => state.items);
+        	const dispatch = useDispatch();
+
+			console.log(items)
+
+			return (
+				<div>
+					{items.load && <h6>Загрузка...</h6>}
+					{items.error && <h6>{items.error}</h6>}
+					<ul>
+						{items.items.map(o => (
+							<li key={o.imdbID}>
+								{o.Title}
+							</li>
+						))}
+					</ul>
+				</div>
+			)
+		}
+
+		function App() {
+			return (
+				<Provider store={store}>
+					<Form />
+					<List />
+				</Provider>
+			);
+		}
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+		ReactDOM.render(
+			<App />, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+
