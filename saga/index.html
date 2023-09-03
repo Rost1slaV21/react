@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Поиск</title>
+	
+	<!-- Стили -->
+	<link rel="stylesheet" href="style.css">
+	
+	<!-- React -->
+	<script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
+
+	<!-- Redux -->
+	<script src="https://unpkg.com/react-redux@8.0.5/dist/react-redux.min.js"></script>
+	<script src="https://unpkg.com/@reduxjs/toolkit@1.9.3/dist/redux-toolkit.umd.js"></script>
+    <script src="https://unpkg.com/redux-saga@1.2.3/dist/redux-saga.umd.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/babel-polyfill/dist/polyfill.min.js"></script> 
+
+	<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+	
+	<script type="text/babel">
+		//Подключаем Хуки
+		const { useState, useEffect  } = React;
+
+		//Подключаем Редакс
+		const { useDispatch, useSelector, Provider } = ReactRedux;
+		const { createStore, combineReducers, applyMiddleware, compose } = RTK;
+
+		//Подключаем Saga
+		const createSagaMiddleware = ReduxSaga.default;
+		const {takeLatest, put, spawn, retry, take, debounce} = ReduxSaga.effects;
+
+		//API запроса на сервер
+		const searchSkills = async (search) => {
+
+			let url = `https://www.omdbapi.com/?apikey=64405bd2&s=${search}`
+			const response = await fetch(url);
+			if (!response.ok) {
+				throw new
+				Error(response.statusText);
+			}
+
+			const res = await response.json();
+			if(res.Response == 'False'){
+				throw new
+				Error(res.Error);
+			}
+
+			return res.Search;
+		}
+
+		//Создаем Saga
+		//------------------ Это типа когда что-то вводим в поиск, проверям, ждем, запускаем поиск -------------------
+		function* debounceChangeSearchSaga(action) {
+			yield put({type: 'SEARCH_SKILLS_REQUEST', payload: action.payload});
+		}
+
+		function filterChangeSearchAction({type, payload}) {
+			return type === 'CHANGE_SEARCH_FIELD' && payload.trim() !== ''
+		}
+
+		function* watchChangeSearchSaga() {
+			yield debounce(300, filterChangeSearchAction, debounceChangeSearchSaga);
+		}
+
+		//------------------ Это типа когда ищем передаем найденные элементы или ошибку -------------------
+		function* handleSearchSkillsSaga(action) {
+			try {
+				const retryCount = 3;
+				const retryDelay = 1 * 1000;
+				const data = yield retry(retryCount, retryDelay, searchSkills, action.payload);
+				yield put({type: 'SEARCH_SKILLS_SUCCESS', payload: data});
+			} catch (e) {
+				yield put({type: 'SEARCH_SKILLS_FAILURE', payload: e.message});
+			}
+		}
+		
+		function* watchSearchSaga() {
+			yield takeLatest('SEARCH_SKILLS_REQUEST', handleSearchSkillsSaga)
+		}
+
+		//Инициализация Saga
+		function* saga() {
+			yield spawn(watchChangeSearchSaga);
+			yield spawn(watchSearchSaga);
+		}
+
+		//Создаем Редюсеры типа меняет глобальное состояние
+		const initialState = {items: [], loading: false, error: null, search: ''};
+		const mainReducer = (state = initialState, action) => {
+			switch (action.type) {
+				case 'SEARCH_SKILLS_REQUEST':
+					return {...state, items: [], loading: true, error: null};
+				case 'SEARCH_SKILLS_FAILURE':
+					return {...state, items: [], loading: false, error: action.payload};
+				case 'SEARCH_SKILLS_SUCCESS':
+					return {...state, items: action.payload, loading: false, error: null};
+				case 'CHANGE_SEARCH_FIELD':
+					return {...state, search: action.payload};
+				default:
+					return state;
+			}
+		};
+
+		//Комбинируем редюсеры
+		const reducer = combineReducers({
+			main: mainReducer,
+		});
+
+		//Что-то делаем с сагой
+		const sagaMiddleware = createSagaMiddleware();
+
+		//Создаем хранилище и подключаем Middleware Saga
+		const store = createStore(
+			reducer,
+			applyMiddleware(sagaMiddleware)
+		);
+
+		//Запускаем сагу
+		sagaMiddleware.run(saga);
+
+		//Компоненты
+		function Main () {
+			//Подписываемся на глобальное состояние
+			const {items, loading, error, search} = useSelector(state => state.main);
+        	const dispatch = useDispatch();
+
+			const handleChange = evt => {
+				const {value} = evt.target;
+
+				dispatch({type: 'CHANGE_SEARCH_FIELD', payload: value});
+			}
+
+			const hasQuery = search.trim() !== '';
+			return (
+				<div>
+					<form>
+						<div>
+							<input type="text" name="name" onChange={handleChange} value={search} />
+						</div>
+					</form>
+					{!hasQuery && <div>Type something to search</div>}
+					{hasQuery && loading && <div>searching...</div>}
+					{error && <h6>{error}</h6>}
+					<ul>
+						{items.map(o => (
+							<li key={o.imdbID}>{o.Title}</li>
+						))}
+					</ul>
+				</div>
+			)
+		}
+
+		function App() {
+			return (
+				<Provider store={store}>
+					<Main />
+				</Provider>
+			);
+		}
+	</script>
+</head>
+<body>
+	<script type="text/babel">
+		ReactDOM.render(
+			<App />, 
+			document.getElementById("root")
+		);
+  	</script>
+	
+	<div id="root"></div>
+</body>
+</html>
+
